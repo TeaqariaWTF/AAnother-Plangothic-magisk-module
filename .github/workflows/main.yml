@@ -1,14 +1,14 @@
 name: Upload zip
-on: 
-  push:
-  workflow_dispatch:
+on: [push, workflow_dispatch]
   
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Make release zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT }}
       run: |
         FONT_VERSION=$(cat version.json | jq -r '.version')
         FONT_P1_URL="https://github.com/Fitzgerald-Porthmouth-Koenigsegg/Plangothic-Project/releases/download/${FONT_VERSION}/PlangothicP1-Regular.allideo.ttf"
@@ -22,7 +22,7 @@ jobs:
         mkdir -p build
         cp ../Plangothic-magisk-module.zip build/
         cp ../Plangothic-magisk-module.zip.sha256sum build/
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: Plangothic-magisk-module
         path: |
@@ -35,13 +35,13 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/') != true
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: Plangothic-magisk-module
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          repo_token: "${{ secrets.PAT }}"
           automatic_release_tag: "nightly-release"
           prerelease: true
           title: "Test build"
@@ -56,14 +56,14 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: Plangothic-magisk-module
 
       - name: Release Action
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             Plangothic-magisk-module.zip
